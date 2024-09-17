@@ -27,7 +27,7 @@ import com.example.mygym.ui.theme.MyGymTheme
 
 @Composable
 fun AddExerciseDialog(
-    onConfirm: (String,String,String,String) -> Unit = {name,series,repetitions,recovery ->},
+    onConfirm: (String,String,String,String,String) -> Unit = {name,series,repetitions,recovery,description ->},
     onDismiss: () -> Unit = {}
 ) {
 
@@ -36,6 +36,7 @@ fun AddExerciseDialog(
     var series by remember { mutableStateOf("") }
     var repetitions by remember { mutableStateOf("") }
     var recovery by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -45,9 +46,10 @@ fun AddExerciseDialog(
                 val focusManager = LocalFocusManager.current
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { if (it.length <= 30) name = it },
+                    onValueChange = { name = it },
                     label = { Text("Nome Esercizio") },
                     singleLine = true,
+                    isError = name.isBlank(),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -58,6 +60,7 @@ fun AddExerciseDialog(
                     onValueChange = { if (it.length <= 2) series = it  },
                     label = { Text("Serie di esercizi") },
                     singleLine = true,
+                    isError = series.isBlank(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -68,6 +71,7 @@ fun AddExerciseDialog(
                     onValueChange = { if (it.length <= 2) repetitions = it },
                     label = { Text("Numero di ripetizioni") },
                     singleLine = true,
+                    isError = repetitions.isBlank(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
@@ -77,7 +81,13 @@ fun AddExerciseDialog(
                     value = recovery,
                     onValueChange = { if (it.length <= 2) recovery = it },
                     label = { Text("Tempo di recupero (in secondi)") },
+                    isError = recovery.isBlank(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done)
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Descrizione esercizio") }
                 )
             }
         },
@@ -85,10 +95,10 @@ fun AddExerciseDialog(
             OutlinedButton(
                 onClick = {
                     if (arrayOf(name, series, repetitions, recovery).all { it.isNotBlank() }) {
-                        onConfirm(name, series, repetitions, recovery)
+                        onConfirm(name, series, repetitions, recovery,description)
                     }
                     else{
-                        Toast.makeText(context,"Tutti i campi devono essere riempiti",Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context,"I primi quattro campi non possono essere vuoti",Toast.LENGTH_SHORT).show()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(
@@ -111,6 +121,7 @@ fun AddExerciseDialog(
         }
     )
 }
+
 
 @Preview(showBackground = true)
 @Composable

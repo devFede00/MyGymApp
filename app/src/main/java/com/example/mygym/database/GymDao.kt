@@ -14,7 +14,7 @@ interface GymDao {
     fun getAllPlans():Flow<List<PlanWithExercises>>
 
     @Query("SELECT * FROM `Plan` WHERE planId=:planId")
-    fun getPlanById(planId: Int):Flow<PlanWithExercises>
+    fun getPlanWithExerciseById(planId: Int):Flow<PlanWithExercises>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNewPlan(newPlan: Plan)
@@ -25,7 +25,7 @@ interface GymDao {
     //----------------------------------------------------
 
     @Query("SELECT * FROM 'Exercise' WHERE planId=:planId")
-    fun getAllExercisesOfPlan(planId: Long): Flow<List<Exercise>>
+    fun getAllExercisesOfPlan(planId:Int): Flow<List<Exercise>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertNewExercise(newExercise: Exercise)

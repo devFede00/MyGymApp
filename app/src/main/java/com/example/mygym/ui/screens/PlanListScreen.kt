@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -67,6 +69,7 @@ fun PlanListScreen(navController: NavController, viewModel: GymManagerViewModel)
             plansWithExercises = planWithExercises,
             onPlanClick ={ planId:Int ->
                 navController.navigate("plan_details/$planId") },
+            onDeletePlan = viewModel::deletePlan
         )
         Spacer(modifier = Modifier.padding(vertical = 16.dp))
         AddPlanCard(onCreatePlan = { showAddPlanDialog = true })
@@ -79,17 +82,18 @@ fun PlanListScreen(navController: NavController, viewModel: GymManagerViewModel)
 fun PlanList(
     modifier: Modifier = Modifier,
     plansWithExercises:List<PlanWithExercises>,
-    onPlanClick: (Int)->Unit,
+    onPlanClick: (Int) -> Unit,
+    onDeletePlan: (Int) -> Unit
 ){
 
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = modifier.padding(horizontal = 8.dp)
+            modifier = modifier.padding(horizontal = 8.dp),
         ) {
             items(plansWithExercises) { planWithDetails ->
 
-                PlanCard(Modifier.padding(8.dp),onPlanClick,planWithDetails.plan)
+                PlanCard(Modifier.padding(8.dp),onPlanClick,onDeletePlan,planWithDetails.plan)
             }
         }
 }
@@ -127,29 +131,37 @@ fun AddPlanCard(onCreatePlan:()->Unit){
 @Composable
 fun PlanListPreview(){
     MyGymTheme {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(vertical = 40.dp, horizontal = 8.dp)
-        ){
-            Text(text = "Schede", fontSize = 48.sp, fontWeight = FontWeight.Bold)
-            PlanList(
-                modifier = Modifier.weight(1F),
-                onPlanClick = {},
-                plansWithExercises = listOf(
-                    PlanWithExercises(
-                        Plan(planId = 0,title = "preview"),
-                        emptyList()),
-                    PlanWithExercises(
-                        Plan(planId = 0,title = "preview"),
-                        emptyList())
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background, // Usa il background del tema
+            ){
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 40.dp, horizontal = 8.dp)
+            ) {
+                Text(text = "Schede", fontSize = 48.sp, fontWeight = FontWeight.Bold)
+                PlanList(
+                    modifier = Modifier.weight(1F),
+                    onPlanClick = {},
+                    onDeletePlan = {},
+                    plansWithExercises = listOf(
+                        PlanWithExercises(
+                            Plan(planId = 0, title = "preview"),
+                            emptyList()
+                        ),
+                        PlanWithExercises(
+                            Plan(planId = 0, title = "preview"),
+                            emptyList()
+                        )
 
+                    )
                 )
-            )
-            Spacer(modifier = Modifier.padding(vertical = 16.dp))
-            AddPlanCard(onCreatePlan = {  })
+                Spacer(modifier = Modifier.padding(vertical = 16.dp))
+                AddPlanCard(onCreatePlan = { })
+            }
         }
 
     }

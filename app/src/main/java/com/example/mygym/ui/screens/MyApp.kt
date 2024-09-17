@@ -56,7 +56,8 @@ fun MainScreenPreview(){
                     PlanWithExercises(Plan(planId = 0,title = "preview0"), emptyList()),
                     PlanWithExercises(Plan(planId = 0,title = "preview1"), emptyList()),
                 ),
-                onPlanClick = {}
+                onPlanClick = {},
+                onDeletePlan = {}
             )
         }
     }

@@ -12,7 +12,8 @@ data class Exercise(
     val series:String,
     val repetitions:String,
     val recovery: String,
-    val planId:Int
+    val planId:Int,
+    val description: String = ""
 )
 
 @Entity

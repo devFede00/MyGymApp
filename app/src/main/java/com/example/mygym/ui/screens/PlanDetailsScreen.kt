@@ -47,10 +47,15 @@ import com.example.mygym.database.Plan
 import com.example.mygym.database.PlanWithExercises
 import com.example.mygym.ui.components.dialogs.AddExerciseDialog
 import com.example.mygym.ui.components.cards.ExerciseCard
+import com.example.mygym.ui.components.dialogs.DescriptionExerciseDialog
 import com.example.mygym.ui.theme.MyGymTheme
 
 @Composable
-fun PlanDetailsScreen(navController: NavHostController, viewModel: GymManagerViewModel, planId: Int) {
+fun PlanDetailsScreen(
+    navController: NavHostController,
+    viewModel: GymManagerViewModel,
+    planId: Int
+) {
     // Supponiamo di ottenere la categoria e gli item dal ViewModel
     val planWithExercises by viewModel.getPlanWithExercises(planId).collectAsState(initial = null)
 
@@ -58,8 +63,8 @@ fun PlanDetailsScreen(navController: NavHostController, viewModel: GymManagerVie
 
     if (showAddExerciseDialog) {
         AddExerciseDialog(
-            onConfirm = { name,series,repetitions,recovery ->
-                viewModel.addExercise(name,series,repetitions,recovery,planId)
+            onConfirm = { name, series, repetitions, recovery, description ->
+                viewModel.addExercise(name, series, repetitions, recovery, planId, description)
                 showAddExerciseDialog = false
             },
             onDismiss = { showAddExerciseDialog = false }
@@ -69,11 +74,12 @@ fun PlanDetailsScreen(navController: NavHostController, viewModel: GymManagerVie
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
-    ){
+    ) {
         planWithExercises?.let {
             PlanDetails(
                 planWithExercises = it,
-                onAddExercise = {showAddExerciseDialog = true}
+                onAddExercise = { showAddExerciseDialog = true },
+                onDeleteExercise = viewModel::deleteExercise
             )
 
         } ?: run {
@@ -84,7 +90,7 @@ fun PlanDetailsScreen(navController: NavHostController, viewModel: GymManagerVie
 }
 
 @Composable
-fun PlanDetails(planWithExercises:PlanWithExercises,onAddExercise: () -> Unit){
+fun PlanDetails(planWithExercises: PlanWithExercises, onAddExercise: () -> Unit, onDeleteExercise:(Exercise)->Unit) {
 
     val exercises = planWithExercises.exercises
 
@@ -94,7 +100,7 @@ fun PlanDetails(planWithExercises:PlanWithExercises,onAddExercise: () -> Unit){
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 40.dp, horizontal = 8.dp)
-    ){
+    ) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 4.dp
@@ -104,17 +110,20 @@ fun PlanDetails(planWithExercises:PlanWithExercises,onAddExercise: () -> Unit){
                 containerColor = Color.Black
             )
         ) {
-            Text(text = planWithExercises.plan.title,
+            Text(
+                text = planWithExercises.plan.title,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
         }
         Spacer(modifier = Modifier.padding(vertical = 20.dp))
-        if(exercises.isNotEmpty()){
-                ExerciseList(
-                    modifier = Modifier.weight(1F),
-                    exerciseList = exercises,
-                )
+        if (exercises.isNotEmpty()) {
+            ExerciseList(
+                modifier = Modifier.weight(1F),
+                onDeleteExercise = onDeleteExercise,
+                exerciseList = exercises,
+            )
         }
         Spacer(modifier = Modifier.padding(vertical = 20.dp))
         AddExerciseCard(onAddExercise = onAddExercise)
@@ -123,28 +132,34 @@ fun PlanDetails(planWithExercises:PlanWithExercises,onAddExercise: () -> Unit){
 
 @Composable
 fun ExerciseList(
-    exerciseList:List<Exercise>,
+    exerciseList: List<Exercise>,
+    onDeleteExercise: (Exercise) -> Unit,
     modifier: Modifier = Modifier,
-){
+) {
 
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = modifier.padding(horizontal = 8.dp)
-        ) {
-            items(exerciseList) { exercise ->
+    LazyColumn(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier.padding(horizontal = 8.dp)
+    ) {
+        items(exerciseList) { exercise ->
 
-                ExerciseCard(Modifier.padding(8.dp),exercise)
+            ExerciseCard(
+                modifier = Modifier.padding(8.dp),
+                onDeleteExercise = onDeleteExercise,
+                exercise = exercise
+            )
 
-            }
         }
-
     }
+
+}
 
 @Composable
 fun AddExerciseCard(
     modifier: Modifier = Modifier,
-    onAddExercise:()->Unit){
+    onAddExercise: () -> Unit
+) {
     OutlinedCard(
         border = BorderStroke(2.dp, Color.Gray),
         modifier = modifier
@@ -171,31 +186,80 @@ fun AddExerciseCard(
 
 @Preview(showBackground = true)
 @Composable
-fun PlanDetailsPreview(){
+fun PlanDetailsPreview() {
     MyGymTheme {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxSize()
-        ){
-                PlanDetails(
-                    planWithExercises =
-                    PlanWithExercises(
-                        Plan(planId = 0,title = "preview"),
-                        listOf(
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                            Exercise(name = "nome", series = "2", repetitions = "2", recovery = "recovery", planId = 0),
-                        )
-                    ),
-                    onAddExercise = {}
-                )
+        ) {
+            PlanDetails(
+                planWithExercises =
+                PlanWithExercises(
+                    Plan(planId = 0, title = "preview"),
+                    listOf(
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                        Exercise(
+                            name = "nome",
+                            series = "2",
+                            repetitions = "2",
+                            recovery = "recovery",
+                            planId = 0
+                        ),
+                    )
+                ),
+                onAddExercise = {},
+                onDeleteExercise = {}
+            )
 
-            }
         }
+    }
 }

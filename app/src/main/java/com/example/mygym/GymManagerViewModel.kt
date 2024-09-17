@@ -7,27 +7,63 @@ import com.example.mygym.database.GymDao
 import com.example.mygym.database.Plan
 import com.example.mygym.database.PlanWithExercises
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
-class GymManagerViewModel(private val gymDao: GymDao) : ViewModel(){
+class GymManagerViewModel(private val gymDao: GymDao) : ViewModel() {
 
-    val planWithExercises : Flow<List<PlanWithExercises>> = gymDao.getAllPlans()
+    val planWithExercises: Flow<List<PlanWithExercises>> = gymDao.getAllPlans()
 
-    fun getPlanWithExercises(planId: Int):Flow<PlanWithExercises>{
-        return gymDao.getPlanById(planId)
+    fun getPlanWithExercises(planId: Int): Flow<PlanWithExercises> {
+        return gymDao.getPlanWithExerciseById(planId)
     }
 
-    fun addPlan(title:String) {
+    fun addPlan(title: String) {
         viewModelScope.launch {
             gymDao.insertNewPlan(Plan(title = title))
         }
     }
 
-    fun addExercise(name:String, series:String, repetitions:String, recovery: String, planId:Int) {
+    fun deletePlan(planId: Int) {
         viewModelScope.launch {
-            gymDao.insertNewExercise(Exercise(name = name, series = series, repetitions = repetitions, recovery = recovery, planId = planId))
+            val planWithExercises = gymDao.getPlanWithExerciseById(planId).first()
+            val exercises = planWithExercises.exercises
+            val plan = planWithExercises.plan
+
+            exercises.forEach {
+                gymDao.deleteExercise(it)
+            }
+
+            gymDao.deletePlan(plan)
+
+        }
+    }
+
+    fun addExercise(
+        name: String,
+        series: String,
+        repetitions: String,
+        recovery: String,
+        planId: Int,
+        description: String
+    ) {
+        viewModelScope.launch {
+            gymDao.insertNewExercise(
+                Exercise(
+                    name = name,
+                    series = series,
+                    repetitions = repetitions,
+                    recovery = recovery,
+                    planId = planId,
+                    description = description
+                )
+            )
+        }
+    }
+
+    fun deleteExercise(exerciseToDelete: Exercise) {
+        viewModelScope.launch {
+            gymDao.deleteExercise(exerciseToDelete)
         }
     }
 

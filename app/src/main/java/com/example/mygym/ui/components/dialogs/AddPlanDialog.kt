@@ -37,10 +37,9 @@ fun AddPlanDialog(
             Column {
                 OutlinedTextField(
                     value = title,
-                    onValueChange = { if (it.length <= 10) title = it },
+                    onValueChange = { title = it },
                     singleLine = true,
-                    label = { Text("Titolo Scheda") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done)
+                    label = { Text("Titolo Scheda") }
                 )
             }
         },

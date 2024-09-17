@@ -14,6 +14,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.example.mygym.database.GymDatabase
+import com.example.mygym.database.MIGRATION_1_2
 import com.example.mygym.ui.screens.MyApp
 import com.example.mygym.ui.theme.MyGymTheme
 
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             GymDatabase::class.java,
             "gym_database.db"
-        ).build()
+        ).addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     private val viewModel by viewModels<GymManagerViewModel>(
